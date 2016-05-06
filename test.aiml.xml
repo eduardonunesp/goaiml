@@ -1,0 +1,60 @@
+<aiml version="1.0.1" encoding="UTF-8">
+   <category>
+      <pattern>MY DOGS NAME IS *</pattern>
+      <template>
+         That is interesting that you have a dog named <set name="dog"><star/></set>
+      </template>
+   </category>
+   <category>
+      <pattern>WHAT IS MY DOGS NAME</pattern>
+      <template>
+         Your dog's name is <get name="dog"/>
+      </template>
+   </category>
+   <category>
+      <pattern>DO YOU HAVE ANY IDEA</pattern>
+      <template>
+         No, I'm sorry, What you saying ?
+      </template>
+   </category>
+   <category>
+      <pattern><bot name="name"/> *</pattern>
+      <template>
+         What's up ?
+      </template>
+   </category>
+   <category>
+      <pattern>I AM *</pattern>
+      <template>
+         <random>
+            <li>Why are you <star/></li>
+            <li>Do your friends call you</li>
+            <li>My name is <bot name="name"/></li>
+         </random>
+      </template>
+   </category>
+   <category>
+      <pattern>* WHATSUP *</pattern>
+      <template>
+         My friends call me <bot name="name"/>
+      </template>
+   </category>
+   <category>
+      <pattern>JUCA *</pattern>
+      <template>
+         JOD,<star/> <star/>
+      </template>
+   </category>
+   <category>
+      <pattern>(YOU|YOUR)? * NAME *</pattern>
+      <template>
+         My friends call me <bot name="name"/>
+      </template>
+   </category>
+   <category>
+      <pattern>*</pattern>
+      <template>
+         <srai>DO YOU HAVE ANY IDEA</srai>
+      </template>
+   </category>
+</aiml>
