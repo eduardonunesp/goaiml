@@ -9,7 +9,19 @@ import (
 )
 
 func (aiml *AIMLInterpreter) LearnFromXML(xmlBytes []byte) error {
-	return xml.Unmarshal(xmlBytes, &aiml.Root)
+	err := xml.Unmarshal(xmlBytes, &aiml.Root)
+
+	if err != nil {
+		return err
+	}
+
+	err = aiml.compilePatterns()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (aiml *AIMLInterpreter) LearnFromFile(mainFile string) error {
@@ -22,6 +34,25 @@ func (aiml *AIMLInterpreter) LearnFromFile(mainFile string) error {
 	bytes, _ := ioutil.ReadAll(xmlFile)
 
 	return aiml.LearnFromXML(bytes)
+}
+
+func (aiml *AIMLInterpreter) compilePatterns() error {
+	for _, category := range aiml.Root.Categories {
+		if strings.Contains(category.Pattern.Content, "<bot") {
+			var err error = nil
+			category.Pattern.Content, err = aiml.ProcessBotTag(category.Pattern.Content)
+			if err != nil {
+				return err
+			}
+		}
+
+		err := category.Pattern.Regexify()
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (aiml *AIMLInterpreter) Respond(input string) (string, error) {
@@ -107,15 +138,7 @@ func (aiml *AIMLInterpreter) processAllTemplateTags(template string, matchRes []
 func (aiml *AIMLInterpreter) findPattern(input string, looped bool) (string, error) {
 	input = preFormatInput(input)
 	for _, category := range aiml.Root.Categories {
-		if strings.Contains(category.Pattern.Content, "<bot") {
-			var err error = nil
-			category.Pattern.Content, err = aiml.ProcessBotTag(category.Pattern.Content)
-			if err != nil {
-				return category.Pattern.Content, err
-			}
-		}
-
-		matchRes := category.Pattern.Regexify().FindStringSubmatch(input)
+		matchRes := category.Pattern.Re.FindStringSubmatch(input)
 		if len(matchRes) > 0 {
 			return aiml.processAllTemplateTags(category.Template.Content, matchRes, looped)
 		}

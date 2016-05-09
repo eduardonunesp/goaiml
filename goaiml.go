@@ -1,6 +1,9 @@
 package goaiml
 
-import "encoding/xml"
+import (
+	"encoding/xml"
+	"regexp"
+)
 
 const BOT_NAME string = "GOAIMLBot"
 const GITHUB string = "https://github.com/eduardonunesp/goaiml"
@@ -12,17 +15,17 @@ type AIMLInterpreter struct {
 }
 
 type AIMLRoot struct {
-	XMLName    xml.Name       `xml:"aiml"`
-	Version    string         `xml:"version,attr"`
-	Encoding   string         `xml:"encoding,attr"`
-	Categories []AIMLCategory `xml:"category"`
-	Topics     []AIMLTopic    `xml:"topic"`
+	XMLName    xml.Name        `xml:"aiml"`
+	Version    string          `xml:"version,attr"`
+	Encoding   string          `xml:"encoding,attr"`
+	Categories []*AIMLCategory `xml:"category"`
+	Topics     []*AIMLTopic    `xml:"topic"`
 }
 
 type AIMLTopic struct {
-	XMLName    xml.Name       `xml:"topic"`
-	Name       string         `xml:"name,attr"`
-	Categories []AIMLCategory `xml:"category"`
+	XMLName    xml.Name        `xml:"topic"`
+	Name       string          `xml:"name,attr"`
+	Categories []*AIMLCategory `xml:"category"`
 }
 
 type AIMLCategory struct {
@@ -40,6 +43,7 @@ type AIMLTemplate struct {
 type AIMLPattern struct {
 	XMLName xml.Name `xml:"pattern"`
 	Content string   `xml:",innerxml"`
+	Re      *regexp.Regexp
 }
 
 func NewAIMLInterpreter() *AIMLInterpreter {

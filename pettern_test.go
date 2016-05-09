@@ -10,7 +10,8 @@ func Test_Pattern_Regexify_1(t *testing.T) {
 		Content: "TEST * IT",
 	}
 
-	matches := aimlPattern.Regexify().FindStringSubmatch(preFormatInput("Test NOW THAT'S it"))
+	aimlPattern.Regexify()
+	matches := aimlPattern.Re.FindStringSubmatch(preFormatInput("Test NOW THAT'S it"))
 
 	if len(matches) != 2 {
 		t.Error("There's no matches:", matches)
@@ -26,7 +27,8 @@ func Test_Pattern_Regexify_2(t *testing.T) {
 		Content: "* IT *",
 	}
 
-	matches := aimlPattern.Regexify().FindStringSubmatch(preFormatInput("BEFORE IT AFTER"))
+	aimlPattern.Regexify()
+	matches := aimlPattern.Re.FindStringSubmatch(preFormatInput("BEFORE IT AFTER"))
 
 	if len(matches) != 3 {
 		t.Error("There's no matches:", matches)
@@ -42,7 +44,8 @@ func Test_Pattern_Regexify_3(t *testing.T) {
 		Content: "* IT *",
 	}
 
-	matches := aimlPattern.Regexify().FindStringSubmatch(preFormatInput("BEFORE IT"))
+	aimlPattern.Regexify()
+	matches := aimlPattern.Re.FindStringSubmatch(preFormatInput("BEFORE IT"))
 
 	if len(matches) != 3 {
 		t.Error("There's no matches:", matches)
@@ -58,7 +61,8 @@ func Test_Pattern_Regexify_4(t *testing.T) {
 		Content: "* IT *",
 	}
 
-	matches := aimlPattern.Regexify().FindStringSubmatch(preFormatInput("IT AFTER"))
+	aimlPattern.Regexify()
+	matches := aimlPattern.Re.FindStringSubmatch(preFormatInput("IT AFTER"))
 
 	if len(matches) != 3 {
 		t.Error("There's no matches:", matches)
