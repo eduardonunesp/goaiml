@@ -1,8 +1,16 @@
 <aiml version="1.0.1" encoding="UTF-8">
+    <category>
+        <pattern>HI</pattern>
+        <template>
+            HELLO!
+        </template>
+   </category>
    <category>
-      <pattern>HI</pattern>
-      <template>
-         HELLO!
-      </template>
+        <pattern>LOAD AIML B</pattern>
+        <template>
+            <learn>to_learn.aiml</learn>
+            <learn>to_learn_too.aiml</learn>
+            Ready now :D
+        </template>
    </category>
 </aiml>

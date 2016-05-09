@@ -3,7 +3,9 @@ package goaiml
 import (
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 )
@@ -24,6 +26,33 @@ func (aiml *AIMLInterpreter) LearnFromXML(xmlBytes []byte) error {
 	return nil
 }
 
+func (aiml *AIMLInterpreter) learnFromMoreXML(learnFile string) error {
+	xmlFile, err := os.Open(learnFile)
+	if err != nil {
+		return err
+	}
+	defer xmlFile.Close()
+
+	bytes, _ := ioutil.ReadAll(xmlFile)
+
+	tmpAiml := NewAIMLInterpreter()
+	err = xml.Unmarshal(bytes, &tmpAiml.Root)
+
+	if err != nil {
+		return err
+	}
+
+	err = tmpAiml.compilePatterns()
+
+	if err != nil {
+		return err
+	}
+
+	aiml.Root.Categories = append(aiml.Root.Categories, tmpAiml.Root.Categories...)
+	aiml.Root.Topics = append(aiml.Root.Topics, tmpAiml.Root.Topics...)
+	return nil
+}
+
 func (aiml *AIMLInterpreter) LearnFromFile(mainFile string) error {
 	xmlFile, err := os.Open(mainFile)
 	if err != nil {
@@ -34,6 +63,12 @@ func (aiml *AIMLInterpreter) LearnFromFile(mainFile string) error {
 	bytes, _ := ioutil.ReadAll(xmlFile)
 
 	return aiml.LearnFromXML(bytes)
+}
+
+func (aiml *AIMLInterpreter) Brain() {
+	for _, category := range aiml.Root.Categories {
+		log.Println(fmt.Sprintf("Pattern %s - Template %s", category.Pattern.Content, category.Template.Content))
+	}
 }
 
 func (aiml *AIMLInterpreter) compilePatterns() error {
@@ -102,6 +137,13 @@ func (aiml *AIMLInterpreter) processBasicTemplateTags(template string, matchRes 
 
 func (aiml *AIMLInterpreter) processAllTemplateTags(template string, matchRes []string, looped bool) (string, error) {
 	var err error = nil
+
+	if strings.Contains(template, "<learn") {
+		template, err = aiml.ProcessLearnTag(template)
+		if err != nil {
+			return template, err
+		}
+	}
 
 	if strings.Contains(template, "<think") {
 		template, err = aiml.ProcessThinkTag(template, matchRes)

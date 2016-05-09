@@ -10,6 +10,32 @@ func Test_Kernel_Loader_From_File(t *testing.T) {
 	}
 }
 
+func Test_Kernel_Learn_Tag(t *testing.T) {
+	aiml := NewAIMLInterpreter()
+	err := aiml.LearnFromFile("test.aiml.xml")
+	if err != nil {
+		t.Error(err)
+	}
+
+	v, err := aiml.Respond("load aiml b")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if v != "Ready now :D" {
+		t.Error("Result not match")
+	}
+
+	v, err = aiml.Respond("just load")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if v != "YEAH MAN" {
+		t.Error("Result not match")
+	}
+}
+
 func Test_Kernel_Loader(t *testing.T) {
 	xml := []byte(
 		`<aiml version="1.0.1" encoding="UTF-8">

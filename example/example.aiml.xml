@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <aiml version="1.0.1" encoding="UTF-8">
-    <category>
-        <pattern>HI</pattern>
-        <template>HELLO!</template>
-    </category>
+
     <category>
         <pattern>MY NAME IS *</pattern>
         <template>
@@ -99,9 +96,9 @@
         </template>
     </category>
     <category>
-        <pattern>*</pattern>
+        <pattern>DO YOU KNOW SOMETHING</pattern>
         <template>
-            <srai>DO YOU HAVE ANY IDEA</srai>
+            <learn>example_learn.aiml</learn> Try again
         </template>
     </category>
 </aiml>

@@ -3,6 +3,7 @@ package goaiml
 import (
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"math/rand"
 	"regexp"
 	"strings"
@@ -223,5 +224,33 @@ func (aiml *AIMLInterpreter) ProcessConditionTag(content string) (string, error)
 		return ret, errT
 	}
 
+	return ret, nil
+}
+
+func (aiml *AIMLInterpreter) ProcessLearnTag(content string) (string, error) {
+	ret := ""
+	learnStruct := struct {
+		Name xml.Name `xml:"learns"`
+		List []struct {
+			XMLName xml.Name `xml:"learn"`
+			Content string   `xml:",innerxml"`
+		} `xml:"learn"`
+	}{}
+
+	tmpContent := fmt.Sprintf("<learns>%s</learns>", content)
+	err := xml.Unmarshal([]byte(tmpContent), &learnStruct)
+
+	if err != nil {
+		return ret, err
+	}
+
+	for _, learnFile := range learnStruct.List {
+		errT := aiml.learnFromMoreXML(learnFile.Content)
+		if errT != nil {
+			return ret, errT
+		}
+	}
+
+	ret = regexp.MustCompile("(?s)<learn>.*</learn>").ReplaceAllString(content, "")
 	return ret, nil
 }
