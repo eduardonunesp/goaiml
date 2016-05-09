@@ -178,6 +178,7 @@ func (aiml *AIMLInterpreter) processAllTemplateTags(template string, matchRes []
 }
 
 func (aiml *AIMLInterpreter) findPattern(input string, looped bool) (string, error) {
+	aiml.History = append(aiml.History, input)
 	input = preFormatInput(input)
 	for _, category := range aiml.Root.Categories {
 		matchRes := category.Pattern.Re.FindStringSubmatch(input)

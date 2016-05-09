@@ -9,9 +9,10 @@ const BOT_NAME string = "GOAIMLBot"
 const GITHUB string = "https://github.com/eduardonunesp/goaiml"
 
 type AIMLInterpreter struct {
-	Memory map[string]string
-	Bot    map[string]string
-	Root   AIMLRoot
+	History []string
+	Memory  map[string]string
+	Bot     map[string]string
+	Root    AIMLRoot
 }
 
 type AIMLRoot struct {

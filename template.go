@@ -254,3 +254,7 @@ func (aiml *AIMLInterpreter) ProcessLearnTag(content string) (string, error) {
 	ret = regexp.MustCompile("(?s)<learn>.*</learn>").ReplaceAllString(content, "")
 	return ret, nil
 }
+
+func (aiml *AIMLInterpreter) ProcessInputTag(content string) (string, error) {
+
+}
