@@ -184,10 +184,29 @@ func (aiml *AIMLInterpreter) processAllTemplateTags(template string, matchRes []
 	return aiml.processBasicTemplateTags(template, matchRes)
 }
 
+func (aiml *AIMLInterpreter) getTopic(name string) *AIMLTopic {
+	for _, topic := range aiml.Root.Topics {
+		if name == topic.Name {
+			return topic
+		}
+	}
+
+	return nil
+}
+
 func (aiml *AIMLInterpreter) findPattern(input string, looped bool) (string, error) {
 	aiml.History = append(aiml.History, input)
 	input = preFormatInput(input)
-	for _, category := range aiml.Root.Categories {
+
+	currCategory := aiml.Root.Categories
+	topicName, ok := aiml.Memory["topic"]
+	if ok && topicName != "" {
+		if topic := aiml.getTopic(topicName); topic != nil {
+			currCategory = topic.Categories
+		}
+	}
+
+	for _, category := range currCategory {
 		matchRes := category.Pattern.Re.FindStringSubmatch(input)
 		if len(matchRes) > 0 {
 			return aiml.processAllTemplateTags(category.Template.Content, matchRes, looped)
