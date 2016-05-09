@@ -106,3 +106,62 @@ func Test_Template_Random(t *testing.T) {
 		t.Error("Result different of value:", v)
 	}
 }
+
+func Test_Template_Condition_1(t *testing.T) {
+	aiml := NewAIMLInterpreter()
+	aiml.Memory["key"] = "value"
+
+	xml := `<condition>
+		<li name="key" value="value">opt 1</li>
+		<li>opt 2</li>
+	</condition>`
+
+	v, err := aiml.ProcessConditionTag(xml)
+
+	if err != nil {
+		t.Error("Error to parser:", err)
+	}
+
+	if v != "opt 1" {
+		t.Error("Result different of value:", v)
+	}
+}
+
+func Test_Template_Condition_2(t *testing.T) {
+	aiml := NewAIMLInterpreter()
+	aiml.Memory["key"] = "value"
+
+	xml := `<condition>
+		<li name="key">opt 1</li>
+		<li>opt 2</li>
+	</condition>`
+
+	v, err := aiml.ProcessConditionTag(xml)
+
+	if err != nil {
+		t.Error("Error to parser:", err)
+	}
+
+	if v != "opt 1" {
+		t.Error("Result different of value:", v)
+	}
+}
+
+func Test_Template_Condition_3(t *testing.T) {
+	aiml := NewAIMLInterpreter()
+
+	xml := `<condition>
+		<li name="key" value="">opt 1</li>
+		<li>opt 2</li>
+	</condition>`
+
+	v, err := aiml.ProcessConditionTag(xml)
+
+	if err != nil {
+		t.Error("Error to parser:", err)
+	}
+
+	if v != "opt 2" {
+		t.Error("Result different of value:", v)
+	}
+}

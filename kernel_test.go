@@ -347,3 +347,39 @@ func Test_Kernel_Respond_At_Random(t *testing.T) {
 		t.Error("Result not match:", result)
 	}
 }
+
+func Test_Kernel_Respond_At_Condition(t *testing.T) {
+	xml := []byte(
+		`<aiml version="1.0.1" encoding="UTF-8">
+			<category>
+			    <pattern>DO YOU THINK</pattern>
+			    <template>
+					<condition>
+						<li name="key" value="value">
+							Why are you Joking
+						</li>
+						<li>
+							Do your friends call you
+						</li>
+					</condition>
+			    </template>
+			</category>
+		</aiml>`,
+	)
+
+	aiml := NewAIMLInterpreter()
+	aiml.Memory["key"] = "value"
+	err := aiml.LearnFromXML(xml)
+	if err != nil {
+		t.Error(err)
+	}
+
+	result, err := aiml.Respond("Do you think")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if result != "Why are you Joking" {
+		t.Error("Result not match:", result)
+	}
+}

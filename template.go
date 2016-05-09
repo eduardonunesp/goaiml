@@ -183,3 +183,45 @@ func (aiml *AIMLInterpreter) ProcessSraiTag(content string) (string, error) {
 
 	return ret, nil
 }
+
+func (aiml *AIMLInterpreter) ProcessConditionTag(content string) (string, error) {
+	ret := ""
+	conditionStruct := struct {
+		XMLName xml.Name `xml:"condition"`
+		List    []struct {
+			XMLName xml.Name `xml:"li"`
+			Name    string   `xml:"name,attr"`
+			Value   string   `xml:"value,attr"`
+			Content string   `xml:",innerxml"`
+		} `xml:"li"`
+	}{}
+
+	err := xml.Unmarshal([]byte(content), &conditionStruct)
+
+	if err != nil {
+		return ret, err
+	}
+
+	for _, li := range conditionStruct.List {
+		memValue, ok := aiml.Memory[li.Name]
+		if ok {
+			if li.Value == "" {
+				ret = li.Content
+				break
+			} else if memValue == li.Value {
+				ret = li.Content
+				break
+			}
+		} else {
+			ret = li.Content
+		}
+	}
+
+	ret, errT := aiml.processAllTemplateTags(ret, []string{}, true)
+
+	if errT != nil {
+		return ret, errT
+	}
+
+	return ret, nil
+}

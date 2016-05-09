@@ -5,6 +5,12 @@
         <template>HELLO!</template>
     </category>
     <category>
+        <pattern>MY NAME IS *</pattern>
+        <template>
+            Nice to meet you <set name="user"><star/></set>
+        </template>
+    </category>
+    <category>
         <pattern>MY DOGS NAME IS *</pattern>
         <template>
             That is interesting that you have a dog named
@@ -16,15 +22,27 @@
     <category>
         <pattern>WHAT IS MY DOGS NAME</pattern>
         <template>
-            Your dog's name is
-            <get name="dog" />
+            <condition>
+                <li name="dog">
+                    Your dog's name is
+                    <get name="dog" />
+                </li>
+                <li>
+                    I don't know
+                </li>
+            </condition>
         </template>
     </category>
     <category>
         <pattern>
             DO YOU HAVE ANY IDEA
         </pattern>
-        <template>No, I'm sorry, What you saying ?</template>
+        <template>
+            <condition>
+                <li name="user">No, I'm sorry <get name="user"/>, What you saying ?</li>
+                <li>No, I'm sorry, What you saying ?</li>
+            </condition>
+        </template>
     </category>
     <category>
         <pattern>

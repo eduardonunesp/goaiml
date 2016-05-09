@@ -90,6 +90,13 @@ func (aiml *AIMLInterpreter) processAllTemplateTags(template string, matchRes []
 		}
 	}
 
+	if strings.Contains(template, "<condition") {
+		template, err = aiml.ProcessConditionTag(template)
+		if err != nil {
+			return template, err
+		}
+	}
+
 	if strings.Contains(template, "<srai") && !looped {
 		return aiml.ProcessSraiTag(template)
 	}
