@@ -11,7 +11,7 @@ import (
 
 func main() {
 	aiml := goaiml.NewAIML()
-	err := aiml.Learn("../test.aiml.xml")
+	err := aiml.LearnFromFile("example.aiml.xml")
 	if err != nil {
 		log.Fatal(err)
 	}

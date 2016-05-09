@@ -6,9 +6,14 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+	"unicode"
 )
 
-func (aiml *AIML) Learn(mainFile string) error {
+func (aiml *AIMLInterpreter) LearnFromXML(xmlBytes []byte) error {
+	return xml.Unmarshal(xmlBytes, &aiml.Root)
+}
+
+func (aiml *AIMLInterpreter) LearnFromFile(mainFile string) error {
 	xmlFile, err := os.Open(mainFile)
 	if err != nil {
 		return err
@@ -17,63 +22,127 @@ func (aiml *AIML) Learn(mainFile string) error {
 
 	bytes, _ := ioutil.ReadAll(xmlFile)
 
-	return xml.Unmarshal(bytes, &aiml.Root)
+	return aiml.LearnFromXML(bytes)
 }
 
-func (aiml *AIML) Respond(input string) (string, error) {
-	aimlTemplate, err := aiml.findPattern(input, false)
+func stringMinifier(in string) (out string) {
+	white := false
+	for _, c := range in {
+		if unicode.IsSpace(c) {
+			if !white {
+				out = out + " "
+			}
+			white = true
+		} else {
+			out = out + string(c)
+			white = false
+		}
+	}
+	return
+}
+
+func postFormatInput(input string) string {
+	return strings.TrimSpace(stringMinifier(strings.Replace(input, "\n", "", -1)))
+}
+
+func (aiml *AIMLInterpreter) Respond(input string) (string, error) {
+	ret, err := aiml.findPattern(input, false)
 
 	if err != nil {
 		return "", err
 	}
 
-	if strings.Contains(aimlTemplate.Content, "<srai") {
+	if strings.Contains(ret, "<srai") {
 		return "", errors.New("Srai reference not found")
 	}
 
-	return strings.TrimSpace(aimlTemplate.Content), nil
+	return postFormatInput(ret), nil
 }
 
-func (aiml *AIML) processTemplateTags(template *AIMLTemplate, matchRes []string, looped bool) (*AIMLTemplate, error) {
-	if strings.Contains(template.Content, "<star") {
-		template.ProcessStar(matchRes)
+func (aiml *AIMLInterpreter) processBasicTemplateTags(template string, matchRes []string) (string, error) {
+	var err error = nil
+
+	if strings.Contains(template, "<star") {
+		template = aiml.ProcessStarTag(template, matchRes)
 	}
 
-	if strings.Contains(template.Content, "<set") {
-		template.ProcessSet(aiml)
+	if strings.Contains(template, "<set") {
+		template, err = aiml.ProcessSetTag(template)
+		if err != nil {
+			return template, err
+		}
 	}
 
-	if strings.Contains(template.Content, "<get") {
-		template.ProcessGet(aiml)
+	if strings.Contains(template, "<get") {
+		template, err = aiml.ProcessGetTag(template)
+		if err != nil {
+			return template, err
+		}
 	}
 
-	if strings.Contains(template.Content, "<bot") {
-		template.ProcessBot(aiml)
+	if strings.Contains(template, "<bot") {
+		template, err = aiml.ProcessBotTag(template)
+		if err != nil {
+			return template, err
+		}
 	}
 
-	if strings.Contains(template.Content, "<srai") && !looped {
-		return template.ProcessSrai(aiml)
+	return template, err
+}
+
+func (aiml *AIMLInterpreter) processAllTemplateTags(template string, matchRes []string, looped bool) (string, error) {
+	var err error = nil
+
+	if strings.Contains(template, "<think") {
+		template, err = aiml.ProcessThinkTag(template, matchRes)
+		if err != nil {
+			return template, err
+		}
 	}
 
-	if strings.Contains(template.Content, "<random") {
-		template.ProcessRandom(aiml)
+	if err != nil {
+		return template, err
 	}
+
+	if strings.Contains(template, "<random") {
+		template, err = aiml.ProcessRandomTag(template, matchRes)
+		if err != nil {
+			return template, err
+		}
+	}
+
+	if strings.Contains(template, "<srai") && !looped {
+		return aiml.ProcessSraiTag(template)
+	}
+
+	return aiml.processBasicTemplateTags(template, matchRes)
+}
+
+func (aiml *AIMLInterpreter) processRestrictedTemplateTags(template string, matchRes []string) (string, error) {
 
 	return template, nil
 }
 
-func (aiml *AIML) findPattern(input string, looped bool) (*AIMLTemplate, error) {
+func preFormatInput(input string) string {
+	return " " + input + " "
+}
+
+func (aiml *AIMLInterpreter) findPattern(input string, looped bool) (string, error) {
+	input = preFormatInput(input)
 	for _, category := range aiml.Root.Categories {
-		input = " " + input + " "
 		if strings.Contains(category.Pattern.Content, "<bot") {
-			category.Pattern.ProcessBot(aiml)
+			var err error = nil
+			category.Pattern.Content, err = aiml.ProcessBotTag(category.Pattern.Content)
+			if err != nil {
+				return category.Pattern.Content, err
+			}
 		}
 
 		matchRes := category.Pattern.Regexify().FindStringSubmatch(input)
 		if len(matchRes) > 0 {
-			return aiml.processTemplateTags(&category.Template, matchRes, looped)
+			return aiml.processAllTemplateTags(category.Template.Content, matchRes, looped)
 		}
 	}
 
-	return nil, errors.New("Template not found")
+	return input, errors.New("Template not found")
 }

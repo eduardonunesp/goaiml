@@ -1,21 +1,74 @@
 package goaiml
 
-import (
-	"log"
-	"testing"
-)
+import "testing"
 
-func TestLib_Loader(t *testing.T) {
-	aiml := NewAIML()
-	err := aiml.Learn("test.aiml.xml")
+func TestKernel_Loader_From_File(t *testing.T) {
+	aiml := NewAIMLInterpreter()
+	err := aiml.LearnFromFile("test.aiml.xml")
 	if err != nil {
 		t.Error(err)
 	}
 }
 
-func TestLib_Respond_Star(t *testing.T) {
-	aiml := NewAIML()
-	err := aiml.Learn("test.aiml.xml")
+func TestKernel_Loader(t *testing.T) {
+	xml := []byte(
+		`<aiml version="1.0.1" encoding="UTF-8">
+		    <category>
+		        <pattern>HI</pattern>
+		        <template>HELLO!</template>
+		    </category>
+		</aiml>`,
+	)
+
+	aiml := NewAIMLInterpreter()
+	err := aiml.LearnFromXML(xml)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestKernel_Respond(t *testing.T) {
+	xml := []byte(
+		`<aiml version="1.0.1" encoding="UTF-8">
+		    <category>
+		        <pattern>HI</pattern>
+		        <template>HELLO!</template>
+		    </category>
+		</aiml>`,
+	)
+
+	aiml := NewAIMLInterpreter()
+	err := aiml.LearnFromXML(xml)
+	if err != nil {
+		t.Error(err)
+	}
+
+	result, err := aiml.Respond("HI")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if result != "HELLO!" {
+		t.Log(result)
+		t.Error("Result not match")
+	}
+}
+
+func TestKernel_Respond_Star(t *testing.T) {
+	xml := []byte(
+		`<aiml version="1.0.1" encoding="UTF-8">
+			<category>
+				<pattern>MY DOGS NAME IS *</pattern>
+				<template>
+				    That is interesting that you have a dog named
+				        <star />
+				</template>
+			</category>
+		</aiml>`,
+	)
+
+	aiml := NewAIMLInterpreter()
+	err := aiml.LearnFromXML(xml)
 	if err != nil {
 		t.Error(err)
 	}
@@ -26,50 +79,61 @@ func TestLib_Respond_Star(t *testing.T) {
 	}
 
 	if result != "That is interesting that you have a dog named Bela" {
-		log.Println(result)
-		t.Error("Result not match")
+		t.Error("Result not match:", result)
 	}
 }
 
-func TestLib_Respond_Star_Star(t *testing.T) {
-	aiml := NewAIML()
-	err := aiml.Learn("test.aiml.xml")
+func TestKernel_Respond_Star_Star(t *testing.T) {
+	xml := []byte(
+		`<aiml version="1.0.1" encoding="UTF-8">
+			<category>
+				<pattern>MY DOGS NAME IS * AND *</pattern>
+				<template>
+				    That is interesting that you have a dog named <star /> and <star />
+				</template>
+			</category>
+		</aiml>`,
+	)
+
+	aiml := NewAIMLInterpreter()
+	err := aiml.LearnFromXML(xml)
 	if err != nil {
 		t.Error(err)
 	}
 
-	result, err := aiml.Respond("MAN WHATSUP TO YOU")
+	result, err := aiml.Respond("My DOGs Name is Bela and Bruce")
 	if err != nil {
 		t.Error(err)
 	}
 
-	if result != "My friends call me "+BOT_NAME {
-		log.Println(result)
-		t.Error("Result not match")
+	if result != "That is interesting that you have a dog named Bela and Bruce" {
+		t.Error("Result not match:", result)
 	}
 }
 
-func TestLib_Respond_Star_Star_Maybe(t *testing.T) {
-	aiml := NewAIML()
-	err := aiml.Learn("test.aiml.xml")
-	if err != nil {
-		t.Error(err)
-	}
+func TestKernel_Respond_Memory(t *testing.T) {
+	xml := []byte(
+		`<aiml version="1.0.1" encoding="UTF-8">
+			<category>
+				<pattern>MY DOGS NAME IS *</pattern>
+				<template>
+				    That is interesting that you have a dog named
+				    <set name="dog">
+				        <star />
+				    </set>
+				</template>
+			</category>
+			<category>
+			    <pattern>WHAT IS MY DOGS NAME</pattern>
+			    <template>
+			        Your dog's name is <get name="dog" />
+			    </template>
+			</category>
+		</aiml>`,
+	)
 
-	result, err := aiml.Respond("MAN WHATSUP")
-	if err != nil {
-		t.Error(err)
-	}
-
-	if result != "My friends call me "+BOT_NAME {
-		log.Println(result)
-		t.Error("Result not match")
-	}
-}
-
-func TestLib_Respond_Memory(t *testing.T) {
-	aiml := NewAIML()
-	err := aiml.Learn("test.aiml.xml")
+	aiml := NewAIMLInterpreter()
+	err := aiml.LearnFromXML(xml)
 	if err != nil {
 		t.Error(err)
 	}
@@ -80,7 +144,7 @@ func TestLib_Respond_Memory(t *testing.T) {
 	}
 
 	if result != "That is interesting that you have a dog named Bela" {
-		log.Println(result)
+		t.Log(result)
 		t.Error("Result not match")
 	}
 
@@ -90,14 +154,25 @@ func TestLib_Respond_Memory(t *testing.T) {
 	}
 
 	if result != "Your dog's name is Bela" {
-		log.Println(result)
+		t.Log(result)
 		t.Error("Result not match")
 	}
 }
 
-func TestLib_Respond_Bot_At_Template(t *testing.T) {
-	aiml := NewAIML()
-	err := aiml.Learn("test.aiml.xml")
+func TestKernel_Respond_Bot_At_Template(t *testing.T) {
+	xml := []byte(
+		`<aiml version="1.0.1" encoding="UTF-8">
+			<category>
+			    <pattern>DO YOU HAVE ANY IDEA</pattern>
+			    <template>
+			        No, I'm <bot name="name" />
+			    </template>
+			</category>
+		</aiml>`,
+	)
+
+	aiml := NewAIMLInterpreter()
+	err := aiml.LearnFromXML(xml)
 	if err != nil {
 		t.Error(err)
 	}
@@ -107,15 +182,26 @@ func TestLib_Respond_Bot_At_Template(t *testing.T) {
 		t.Error(err)
 	}
 
-	if result != "No, I'm sorry, What you saying ?" {
-		log.Println(result)
+	if result != "No, I'm "+BOT_NAME {
+		t.Log(result)
 		t.Error("Result not match")
 	}
 }
 
-func TestLib_Respond_Bot_At_Pattern(t *testing.T) {
-	aiml := NewAIML()
-	err := aiml.Learn("test.aiml.xml")
+func TestKernel_Respond_Bot_At_Pattern(t *testing.T) {
+	xml := []byte(
+		`<aiml version="1.0.1" encoding="UTF-8">
+			<category>
+			    <pattern><bot name="name"/> *</pattern>
+			    <template>
+			        No, I'm <bot name="name" />
+			    </template>
+			</category>
+		</aiml>`,
+	)
+
+	aiml := NewAIMLInterpreter()
+	err := aiml.LearnFromXML(xml)
 	if err != nil {
 		t.Error(err)
 	}
@@ -125,42 +211,105 @@ func TestLib_Respond_Bot_At_Pattern(t *testing.T) {
 		t.Error(err)
 	}
 
-	if result != "What's up ?" {
-		log.Println(result)
+	if result != "No, I'm "+BOT_NAME {
+		t.Log(result)
 		t.Error("Result not match")
 	}
 }
 
-func TestLib_Respond_At_Srai(t *testing.T) {
-	aiml := NewAIML()
-	err := aiml.Learn("test.aiml.xml")
+func TestKernel_Respond_At_Think(t *testing.T) {
+	xml := []byte(
+		`<aiml version="1.0.1" encoding="UTF-8">
+			<category>
+			    <pattern>I AM *</pattern>
+			    <template>
+			        <think><set name="ok"><star /></set></think>
+			        Maybe :D
+			    </template>
+			</category>
+		</aiml>`,
+	)
+
+	aiml := NewAIMLInterpreter()
+	err := aiml.LearnFromXML(xml)
 	if err != nil {
 		t.Error(err)
 	}
 
-	result, err := aiml.Respond("BLL ASD 123 ASD")
+	result, err := aiml.Respond("I AM YOUR FRIEND")
 	if err != nil {
 		t.Error(err)
 	}
 
-	if result != "No, I'm sorry, What you saying ?" {
+	if result != "Maybe :D" {
+		t.Log(result)
 		t.Error("Result not match")
 	}
 }
 
-func TestLib_Respond_At_Random(t *testing.T) {
-	aiml := NewAIML()
-	err := aiml.Learn("test.aiml.xml")
+func TestKernel_Respond_At_Srai(t *testing.T) {
+	xml := []byte(
+		`<aiml version="1.0.1" encoding="UTF-8">
+			<category>
+			    <pattern>I AM *</pattern>
+			    <template>
+			        <think><set name="ok"><star /></set></think>
+			        Maybe :D
+			    </template>
+			</category>
+			<category>
+			    <pattern>DO I KNOW</pattern>
+			    <template>
+					<srai>I AM IRON MAN</srai>
+			    </template>
+			</category>
+		</aiml>`,
+	)
+
+	aiml := NewAIMLInterpreter()
+	err := aiml.LearnFromXML(xml)
 	if err != nil {
 		t.Error(err)
 	}
 
-	result, err := aiml.Respond("I AM Joking")
+	result, err := aiml.Respond("DO I KNOW")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if result != "Maybe :D" {
+		t.Error("Result not match")
+	}
+}
+
+func TestKernel_Respond_At_Random(t *testing.T) {
+	xml := []byte(
+		`<aiml version="1.0.1" encoding="UTF-8">
+			<category>
+			    <pattern>DO YOU THINK</pattern>
+			    <template>
+					<random>
+						<li>Why are you Joking</li>
+						<li>Do your friends call you</li>
+						<li>My name is ` + BOT_NAME + `</li>
+					</random>
+			    </template>
+			</category>
+		</aiml>`,
+	)
+
+	aiml := NewAIMLInterpreter()
+	err := aiml.LearnFromXML(xml)
+	if err != nil {
+		t.Error(err)
+	}
+
+	result, err := aiml.Respond("Do you think")
 	if err != nil {
 		t.Error(err)
 	}
 
 	if result != "Why are you Joking" && result != "Do your friends call you" && result != "My name is GOAIMLBot" {
-		t.Error("Result not match")
+		t.Error("Result not match:", result)
 	}
 }

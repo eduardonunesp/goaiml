@@ -3,8 +3,9 @@ package goaiml
 import "encoding/xml"
 
 const BOT_NAME string = "GOAIMLBot"
+const GITHUB string = "https://github.com/eduardonunesp/goaiml"
 
-type AIML struct {
+type AIMLInterpreter struct {
 	Memory map[string]string
 	Bot    map[string]string
 	Root   AIMLRoot
@@ -12,6 +13,15 @@ type AIML struct {
 
 type AIMLRoot struct {
 	XMLName    xml.Name       `xml:"aiml"`
+	Version    string         `xml:"version,attr"`
+	Encoding   string         `xml:"encoding,attr"`
+	Categories []AIMLCategory `xml:"category"`
+	Topics     []AIMLTopic    `xml:"topic"`
+}
+
+type AIMLTopic struct {
+	XMLName    xml.Name       `xml:"topic"`
+	Name       string         `xml:"name,attr"`
 	Categories []AIMLCategory `xml:"category"`
 }
 
@@ -32,8 +42,8 @@ type AIMLPattern struct {
 	Content string   `xml:",innerxml"`
 }
 
-func NewAIML() *AIML {
-	ret := &AIML{
+func NewAIMLInterpreter() *AIMLInterpreter {
+	ret := &AIMLInterpreter{
 		Memory: make(map[string]string),
 		Bot:    make(map[string]string),
 	}

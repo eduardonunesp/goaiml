@@ -4,96 +4,98 @@ import (
 	"encoding/xml"
 	"errors"
 	"math/rand"
+	"regexp"
 	"strings"
 	"time"
 )
 
-func (aimlTemplate *AIMLTemplate) ProcessSet(aiml *AIML) error {
+func (aiml *AIMLInterpreter) ProcessSetTag(content string) (string, error) {
+	ret := ""
 	setStruct := struct {
 		XMLName xml.Name `xml:"set"`
 		Name    string   `xml:"name,attr"`
 		Content string   `xml:",innerxml"`
 	}{}
 
-	err := xml.Unmarshal([]byte(aimlTemplate.Content), &setStruct)
+	err := xml.Unmarshal([]byte(content), &setStruct)
 
 	if err != nil {
-		return err
+		return ret, err
 	}
 
-	aimlTemplate.Content = strings.Replace(aimlTemplate.Content, `<set name="`+setStruct.Name+`">`, "", -1)
-	aimlTemplate.Content = strings.Replace(aimlTemplate.Content, `</set>`, "", -1)
+	ret = content
+	ret = strings.Replace(ret, `<set name="`+setStruct.Name+`">`, "", -1)
+	ret = strings.Replace(ret, `</set>`, "", -1)
 
 	aiml.Memory[setStruct.Name] = setStruct.Content
-	return nil
+
+	return ret, nil
 }
 
-func (aimlTemplate *AIMLTemplate) ProcessGet(aiml *AIML) error {
+func (aiml *AIMLInterpreter) ProcessGetTag(content string) (string, error) {
+	ret := ""
 	getStruct := struct {
 		XMLName xml.Name `xml:"get"`
 		Name    string   `xml:"name,attr"`
 	}{}
 
-	err := xml.Unmarshal([]byte(aimlTemplate.Content), &getStruct)
+	err := xml.Unmarshal([]byte(content), &getStruct)
 
 	if err != nil {
-		return err
+		return ret, err
 	}
 
-	content, ok := aiml.Memory[getStruct.Name]
+	value, ok := aiml.Memory[getStruct.Name]
 
 	if !ok {
-		return errors.New("Key not found in memory")
+		return ret, errors.New("Key not found in memory")
 	}
 
-	aimlTemplate.Content = strings.Replace(aimlTemplate.Content, `<get name="`+getStruct.Name+`"/>`, content, -1)
-	return nil
+	ret = content
+	ret = strings.Replace(ret, `<get name="`+getStruct.Name+`" />`, value, -1)
+	ret = strings.Replace(ret, `<get name="`+getStruct.Name+`"/>`, value, -1)
+
+	return ret, nil
 }
 
-func (aimlTemplate *AIMLTemplate) ProcessBot(aiml *AIML) error {
+func (aiml *AIMLInterpreter) ProcessBotTag(content string) (string, error) {
+	ret := ""
 	botStruct := struct {
 		XMLName xml.Name `xml:"bot"`
 		Name    string   `xml:"name,attr"`
 	}{}
 
-	err := xml.Unmarshal([]byte(aimlTemplate.Content), &botStruct)
+	err := xml.Unmarshal([]byte(content), &botStruct)
 
 	if err != nil {
-		return err
+		return ret, err
 	}
 
-	content, ok := aiml.Bot[botStruct.Name]
+	value, ok := aiml.Bot[botStruct.Name]
 
 	if !ok {
-		return errors.New("Key not found in memory")
+		return ret, errors.New("Key not found in bot")
 	}
 
-	aimlTemplate.Content = strings.Replace(aimlTemplate.Content, `<bot name="`+botStruct.Name+`"/>`, content, -1)
-	return nil
-}
-
-func (aimlTemplate *AIMLTemplate) ProcessSrai(aiml *AIML) (*AIMLTemplate, error) {
-	sraiStruct := struct {
-		XMLName xml.Name `xml:"srai"`
-		Content string   `xml:",innerxml"`
-	}{}
-
-	err := xml.Unmarshal([]byte(aimlTemplate.Content), &sraiStruct)
-
-	if err != nil {
-		return nil, err
-	}
-
-	sraiStruct.Content = strings.Replace(sraiStruct.Content, `<srai>`, "", -1)
-	sraiStruct.Content = strings.Replace(sraiStruct.Content, `</srai>`, "", -1)
-
-	ret, errPattern := aiml.findPattern(sraiStruct.Content, true)
-
-	if errPattern != nil {
-		return nil, errPattern
-	}
+	ret = content
+	ret = strings.Replace(ret, `<bot name="`+botStruct.Name+`" />`, value, -1)
+	ret = strings.Replace(ret, `<bot name="`+botStruct.Name+`"/>`, value, -1)
 
 	return ret, nil
+}
+
+func (aiml *AIMLInterpreter) ProcessStarTag(content string, starContent []string) string {
+	ret := content
+	for idx, sContent := range starContent {
+		if idx > 0 {
+			ret = strings.Replace(ret, "<star />", strings.TrimSpace(sContent), 1)
+			ret = strings.Replace(ret, "<star/>", strings.TrimSpace(sContent), 1)
+		}
+	}
+
+	ret = strings.Replace(ret, "<star />", "", -1)
+	ret = strings.Replace(ret, "<star/>", "", -1)
+	return ret
 }
 
 func random(min, max int) int {
@@ -101,7 +103,8 @@ func random(min, max int) int {
 	return rand.Intn(max-min) + min
 }
 
-func (aimlTemplate *AIMLTemplate) ProcessRandom(aiml *AIML) error {
+func (aiml *AIMLInterpreter) ProcessRandomTag(content string, starContent []string) (string, error) {
+	ret := ""
 	randomStruct := struct {
 		XMLName xml.Name `xml:"random"`
 		List    []struct {
@@ -110,32 +113,73 @@ func (aimlTemplate *AIMLTemplate) ProcessRandom(aiml *AIML) error {
 		} `xml:"li"`
 	}{}
 
-	err := xml.Unmarshal([]byte(aimlTemplate.Content), &randomStruct)
+	err := xml.Unmarshal([]byte(content), &randomStruct)
 
 	if err != nil {
-		return err
+		return ret, err
 	}
 
 	randIdx := random(0, len(randomStruct.List))
 	randContent := randomStruct.List[randIdx]
-	aimlTemplate.Content = randContent.Content
-	arr := []string{}
+	li := randContent.Content
 
-	_, errT := aiml.processTemplateTags(aimlTemplate, arr, true)
+	ret, errT := aiml.processAllTemplateTags(li, []string{}, true)
 
 	if errT != nil {
-		return errT
+		return ret, errT
 	}
 
-	return nil
+	return ret, nil
 }
 
-func (aimlTemplate *AIMLTemplate) ProcessStar(starContent []string) {
-	for idx, sContent := range starContent {
-		if idx > 0 {
-			aimlTemplate.Content = strings.Replace(aimlTemplate.Content, "<star/>", strings.TrimSpace(sContent), 1)
-		}
+func (aiml *AIMLInterpreter) ProcessThinkTag(content string, starContent []string) (string, error) {
+	ret := ""
+	thinkStruct := struct {
+		XMLName xml.Name `xml:"think"`
+		Content string   `xml:",innerxml"`
+	}{}
+
+	err := xml.Unmarshal([]byte(content), &thinkStruct)
+
+	if err != nil {
+		return ret, err
 	}
 
-	aimlTemplate.Content = strings.Replace(aimlTemplate.Content, "<star/>", "", -1)
+	tmp := content
+	tmp = strings.Replace(tmp, `<think>`, "", -1)
+	tmp = strings.Replace(tmp, `</think>`, "", -1)
+
+	_, errPattern := aiml.processBasicTemplateTags(tmp, starContent)
+
+	if errPattern != nil {
+		return tmp, errPattern
+	}
+
+	ret = regexp.MustCompile("(?s)<think>.*</think>").ReplaceAllString(content, "")
+	return ret, nil
+}
+
+func (aiml *AIMLInterpreter) ProcessSraiTag(content string) (string, error) {
+	ret := ""
+	sraiStruct := struct {
+		XMLName xml.Name `xml:"srai"`
+		Content string   `xml:",innerxml"`
+	}{}
+
+	err := xml.Unmarshal([]byte(content), &sraiStruct)
+
+	if err != nil {
+		return ret, err
+	}
+
+	sraiStruct.Content = strings.Replace(sraiStruct.Content, `<srai>`, "", -1)
+	sraiStruct.Content = strings.Replace(sraiStruct.Content, `</srai>`, "", -1)
+
+	ret, errPattern := aiml.findPattern(sraiStruct.Content, true)
+
+	if errPattern != nil {
+		return ret, errPattern
+	}
+
+	return ret, nil
 }
