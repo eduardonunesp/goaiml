@@ -165,3 +165,35 @@ func Test_Template_Condition_3(t *testing.T) {
 		t.Error("Result different of value:", v)
 	}
 }
+
+func Test_Template_InputTag_1(t *testing.T) {
+	aiml := NewAIMLInterpreter()
+	aiml.History = append(aiml.History, "abc")
+	aiml.History = append(aiml.History, "xyz")
+
+	v, err := aiml.ProcessInputTag(`this is a <input index="1"/>`)
+
+	if err != nil {
+		t.Error("Error to parser:", err)
+	}
+
+	if v != "this is a xyz" {
+		t.Error("Result different of value:", v)
+	}
+}
+
+func Test_Template_InputTag_2(t *testing.T) {
+	aiml := NewAIMLInterpreter()
+	aiml.History = append(aiml.History, "abc")
+	aiml.History = append(aiml.History, "xyz")
+
+	v, err := aiml.ProcessInputTag(`this is a <input index="2"/>`)
+
+	if err != nil {
+		t.Error("Error to parser:", err)
+	}
+
+	if v != "this is a abc" {
+		t.Error("Result different of value:", v)
+	}
+}

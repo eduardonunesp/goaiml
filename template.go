@@ -6,9 +6,14 @@ import (
 	"fmt"
 	"math/rand"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
+
+var inputRegex = regexp.MustCompile(`(?i)<input index="(\d+)"\s?/>`)
+var thinkRegex = regexp.MustCompile("(?s)<think>.*</think>")
+var learnRegex = regexp.MustCompile("(?s)<learn>.*</learn>")
 
 func (aiml *AIMLInterpreter) ProcessSetTag(content string) (string, error) {
 	ret := ""
@@ -156,7 +161,7 @@ func (aiml *AIMLInterpreter) ProcessThinkTag(content string, starContent []strin
 		return tmp, errPattern
 	}
 
-	ret = regexp.MustCompile("(?s)<think>.*</think>").ReplaceAllString(content, "")
+	ret = thinkRegex.ReplaceAllString(content, "")
 	return ret, nil
 }
 
@@ -251,10 +256,24 @@ func (aiml *AIMLInterpreter) ProcessLearnTag(content string) (string, error) {
 		}
 	}
 
-	ret = regexp.MustCompile("(?s)<learn>.*</learn>").ReplaceAllString(content, "")
+	ret = learnRegex.ReplaceAllString(content, "")
 	return ret, nil
 }
 
 func (aiml *AIMLInterpreter) ProcessInputTag(content string) (string, error) {
+	ret := content
 
+	matchRes := inputRegex.FindStringSubmatch(content)
+	if len(matchRes) > 1 {
+		hIndex, err := strconv.Atoi(matchRes[1])
+
+		if err != nil {
+			return ret, err
+		}
+
+		history := reverseStrings(aiml.History)
+		ret = inputRegex.ReplaceAllString(content, history[hIndex-1])
+	}
+
+	return ret, nil
 }

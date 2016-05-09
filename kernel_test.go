@@ -409,3 +409,39 @@ func Test_Kernel_Respond_At_Condition(t *testing.T) {
 		t.Error("Result not match:", result)
 	}
 }
+
+func Test_Kernel_Respond_At_Input(t *testing.T) {
+	xml := []byte(
+		`<aiml version="1.0.1" encoding="UTF-8">
+			<category>
+				<pattern>YES</pattern>
+				<template>Understood</template>
+			</category>
+			<category>
+				<pattern>SURE</pattern>
+				<template>Yes, you said <input index="2" /></template>
+			</category>
+		</aiml>`,
+	)
+
+	aiml := NewAIMLInterpreter()
+	err := aiml.LearnFromXML(xml)
+	if err != nil {
+		t.Error(err)
+	}
+
+	result, err := aiml.Respond("YES")
+	if err != nil {
+		t.Error(err)
+	}
+
+	result, err = aiml.Respond("SURE")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if result != "Yes, you said YES" {
+		t.Error("Result not match:", result)
+	}
+
+}

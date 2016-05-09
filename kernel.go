@@ -107,6 +107,13 @@ func (aiml *AIMLInterpreter) Respond(input string) (string, error) {
 func (aiml *AIMLInterpreter) processBasicTemplateTags(template string, matchRes []string) (string, error) {
 	var err error = nil
 
+	if strings.Contains(template, "<input") {
+		template, err = aiml.ProcessInputTag(template)
+		if err != nil {
+			return template, err
+		}
+	}
+
 	if strings.Contains(template, "<star") {
 		template = aiml.ProcessStarTag(template, matchRes)
 	}
