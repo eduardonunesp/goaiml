@@ -2,7 +2,7 @@ package goaiml
 
 import "testing"
 
-func TestKernel_Loader_From_File(t *testing.T) {
+func Test_Kernel_Loader_From_File(t *testing.T) {
 	aiml := NewAIMLInterpreter()
 	err := aiml.LearnFromFile("test.aiml.xml")
 	if err != nil {
@@ -10,12 +10,16 @@ func TestKernel_Loader_From_File(t *testing.T) {
 	}
 }
 
-func TestKernel_Loader(t *testing.T) {
+func Test_Kernel_Loader(t *testing.T) {
 	xml := []byte(
 		`<aiml version="1.0.1" encoding="UTF-8">
 		    <category>
-		        <pattern>HI</pattern>
-		        <template>HELLO!</template>
+		        <pattern>
+		        	HI
+		        </pattern>
+		        <template>
+		        	HELLO!
+		        </template>
 		    </category>
 		</aiml>`,
 	)
@@ -27,12 +31,16 @@ func TestKernel_Loader(t *testing.T) {
 	}
 }
 
-func TestKernel_Respond(t *testing.T) {
+func Test_Kernel_Respond(t *testing.T) {
 	xml := []byte(
 		`<aiml version="1.0.1" encoding="UTF-8">
 		    <category>
-		        <pattern>HI</pattern>
-		        <template>HELLO!</template>
+		        <pattern>
+		        	HI
+		        </pattern>
+		        <template>
+		        	HELLO!
+		        </template>
 		    </category>
 		</aiml>`,
 	)
@@ -54,14 +62,15 @@ func TestKernel_Respond(t *testing.T) {
 	}
 }
 
-func TestKernel_Respond_Star(t *testing.T) {
+func Test_Kernel_Respond_Star(t *testing.T) {
 	xml := []byte(
 		`<aiml version="1.0.1" encoding="UTF-8">
 			<category>
-				<pattern>MY DOGS NAME IS *</pattern>
+				<pattern>
+					MY DOGS NAME IS *
+				</pattern>
 				<template>
-				    That is interesting that you have a dog named
-				        <star />
+				    That is interesting that you have a dog named <star />
 				</template>
 			</category>
 		</aiml>`,
@@ -83,11 +92,13 @@ func TestKernel_Respond_Star(t *testing.T) {
 	}
 }
 
-func TestKernel_Respond_Star_Star(t *testing.T) {
+func Test_Kernel_Respond_Star_Star(t *testing.T) {
 	xml := []byte(
 		`<aiml version="1.0.1" encoding="UTF-8">
 			<category>
-				<pattern>MY DOGS NAME IS * AND *</pattern>
+				<pattern>
+					MY DOGS NAME IS * AND *
+				</pattern>
 				<template>
 				    That is interesting that you have a dog named <star /> and <star />
 				</template>
@@ -111,7 +122,7 @@ func TestKernel_Respond_Star_Star(t *testing.T) {
 	}
 }
 
-func TestKernel_Respond_Memory(t *testing.T) {
+func Test_Kernel_Respond_Memory(t *testing.T) {
 	xml := []byte(
 		`<aiml version="1.0.1" encoding="UTF-8">
 			<category>
@@ -124,7 +135,9 @@ func TestKernel_Respond_Memory(t *testing.T) {
 				</template>
 			</category>
 			<category>
-			    <pattern>WHAT IS MY DOGS NAME</pattern>
+			    <pattern>
+			    	WHAT IS MY DOGS NAME
+			    </pattern>
 			    <template>
 			        Your dog's name is <get name="dog" />
 			    </template>
@@ -159,11 +172,13 @@ func TestKernel_Respond_Memory(t *testing.T) {
 	}
 }
 
-func TestKernel_Respond_Bot_At_Template(t *testing.T) {
+func Test_Kernel_Respond_Bot_At_Template(t *testing.T) {
 	xml := []byte(
 		`<aiml version="1.0.1" encoding="UTF-8">
 			<category>
-			    <pattern>DO YOU HAVE ANY IDEA</pattern>
+			    <pattern>
+			    	DO YOU HAVE ANY IDEA
+			    </pattern>
 			    <template>
 			        No, I'm <bot name="name" />
 			    </template>
@@ -188,11 +203,14 @@ func TestKernel_Respond_Bot_At_Template(t *testing.T) {
 	}
 }
 
-func TestKernel_Respond_Bot_At_Pattern(t *testing.T) {
+func Test_Kernel_Respond_Bot_At_Pattern(t *testing.T) {
 	xml := []byte(
 		`<aiml version="1.0.1" encoding="UTF-8">
 			<category>
-			    <pattern><bot name="name"/> *</pattern>
+			    <pattern>
+			    	<bot name="name"/>
+			    	*
+			    </pattern>
 			    <template>
 			        No, I'm <bot name="name" />
 			    </template>
@@ -217,13 +235,17 @@ func TestKernel_Respond_Bot_At_Pattern(t *testing.T) {
 	}
 }
 
-func TestKernel_Respond_At_Think(t *testing.T) {
+func Test_Kernel_Respond_At_Think(t *testing.T) {
 	xml := []byte(
 		`<aiml version="1.0.1" encoding="UTF-8">
 			<category>
 			    <pattern>I AM *</pattern>
 			    <template>
-			        <think><set name="ok"><star /></set></think>
+			        <think>
+			        	<set name="ok">
+			        		<star />
+			        	</set>
+			        </think>
 			        Maybe :D
 			    </template>
 			</category>
@@ -247,18 +269,24 @@ func TestKernel_Respond_At_Think(t *testing.T) {
 	}
 }
 
-func TestKernel_Respond_At_Srai(t *testing.T) {
+func Test_Kernel_Respond_At_Srai(t *testing.T) {
 	xml := []byte(
 		`<aiml version="1.0.1" encoding="UTF-8">
 			<category>
 			    <pattern>I AM *</pattern>
 			    <template>
-			        <think><set name="ok"><star /></set></think>
+			        <think>
+			        	<set name="ok">
+			        		<star />
+			        	</set>
+			        </think>
 			        Maybe :D
 			    </template>
 			</category>
 			<category>
-			    <pattern>DO I KNOW</pattern>
+			    <pattern>
+			    	DO I KNOW
+			    </pattern>
 			    <template>
 					<srai>I AM IRON MAN</srai>
 			    </template>
@@ -282,16 +310,22 @@ func TestKernel_Respond_At_Srai(t *testing.T) {
 	}
 }
 
-func TestKernel_Respond_At_Random(t *testing.T) {
+func Test_Kernel_Respond_At_Random(t *testing.T) {
 	xml := []byte(
 		`<aiml version="1.0.1" encoding="UTF-8">
 			<category>
 			    <pattern>DO YOU THINK</pattern>
 			    <template>
 					<random>
-						<li>Why are you Joking</li>
-						<li>Do your friends call you</li>
-						<li>My name is ` + BOT_NAME + `</li>
+						<li>
+							Why are you Joking
+						</li>
+						<li>
+							Do your friends call you
+						</li>
+						<li>
+							My name is ` + BOT_NAME + `
+						</li>
 					</random>
 			    </template>
 			</category>

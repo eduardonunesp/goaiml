@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	aiml := goaiml.NewAIML()
+	aiml := goaiml.NewAIMLInterpreter()
 	err := aiml.LearnFromFile("example.aiml.xml")
 	if err != nil {
 		log.Fatal(err)

@@ -2,7 +2,7 @@ package goaiml
 
 import "testing"
 
-func TestTemplate_SetTag(t *testing.T) {
+func Test_Template_SetTag(t *testing.T) {
 	aiml := NewAIMLInterpreter()
 	v, err := aiml.ProcessSetTag(`this is a <set name="key">value</set>`)
 
@@ -25,7 +25,7 @@ func TestTemplate_SetTag(t *testing.T) {
 	}
 }
 
-func TestTemplate_GetTag(t *testing.T) {
+func Test_Template_GetTag(t *testing.T) {
 	aiml := NewAIMLInterpreter()
 	_, err := aiml.ProcessSetTag(`this is a <set name="key">value</set>`)
 
@@ -44,7 +44,7 @@ func TestTemplate_GetTag(t *testing.T) {
 	}
 }
 
-func TestTemplate_BotTag(t *testing.T) {
+func Test_Template_BotTag(t *testing.T) {
 	aiml := NewAIMLInterpreter()
 	v, err := aiml.ProcessBotTag(`the bot name is <bot name="name"/>`)
 
@@ -57,7 +57,7 @@ func TestTemplate_BotTag(t *testing.T) {
 	}
 }
 
-func TestTemplate_StarTag(t *testing.T) {
+func Test_Template_StarTag(t *testing.T) {
 	aiml := NewAIMLInterpreter()
 	v := aiml.ProcessStarTag(`WHATS APP <star/> JOW <star/>`, []string{"", "MY", "FRIEND"})
 
@@ -66,7 +66,7 @@ func TestTemplate_StarTag(t *testing.T) {
 	}
 }
 
-func TestTemplate_Think(t *testing.T) {
+func Test_Template_Think(t *testing.T) {
 	aiml := NewAIMLInterpreter()
 
 	starContent := []string{}
@@ -87,7 +87,7 @@ func TestTemplate_Think(t *testing.T) {
 	}
 }
 
-func TestTemplate_Random(t *testing.T) {
+func Test_Template_Random(t *testing.T) {
 	aiml := NewAIMLInterpreter()
 
 	xml := `<random>

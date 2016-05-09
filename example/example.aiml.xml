@@ -21,7 +21,9 @@
         </template>
     </category>
     <category>
-        <pattern>DO YOU HAVE ANY IDEA</pattern>
+        <pattern>
+            DO YOU HAVE ANY IDEA
+        </pattern>
         <template>No, I'm sorry, What you saying ?</template>
     </category>
     <category>

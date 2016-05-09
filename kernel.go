@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
-	"unicode"
 )
 
 func (aiml *AIMLInterpreter) LearnFromXML(xmlBytes []byte) error {
@@ -23,26 +22,6 @@ func (aiml *AIMLInterpreter) LearnFromFile(mainFile string) error {
 	bytes, _ := ioutil.ReadAll(xmlFile)
 
 	return aiml.LearnFromXML(bytes)
-}
-
-func stringMinifier(in string) (out string) {
-	white := false
-	for _, c := range in {
-		if unicode.IsSpace(c) {
-			if !white {
-				out = out + " "
-			}
-			white = true
-		} else {
-			out = out + string(c)
-			white = false
-		}
-	}
-	return
-}
-
-func postFormatInput(input string) string {
-	return strings.TrimSpace(stringMinifier(strings.Replace(input, "\n", "", -1)))
 }
 
 func (aiml *AIMLInterpreter) Respond(input string) (string, error) {
@@ -116,15 +95,6 @@ func (aiml *AIMLInterpreter) processAllTemplateTags(template string, matchRes []
 	}
 
 	return aiml.processBasicTemplateTags(template, matchRes)
-}
-
-func (aiml *AIMLInterpreter) processRestrictedTemplateTags(template string, matchRes []string) (string, error) {
-
-	return template, nil
-}
-
-func preFormatInput(input string) string {
-	return " " + input + " "
 }
 
 func (aiml *AIMLInterpreter) findPattern(input string, looped bool) (string, error) {

@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestPattern_Regexify_1(t *testing.T) {
+func Test_Pattern_Regexify_1(t *testing.T) {
 	aimlPattern := &AIMLPattern{
 		Content: "TEST * IT",
 	}
@@ -21,7 +21,7 @@ func TestPattern_Regexify_1(t *testing.T) {
 	}
 }
 
-func TestPattern_Regexify_2(t *testing.T) {
+func Test_Pattern_Regexify_2(t *testing.T) {
 	aimlPattern := &AIMLPattern{
 		Content: "* IT *",
 	}
@@ -37,7 +37,7 @@ func TestPattern_Regexify_2(t *testing.T) {
 	}
 }
 
-func TestPattern_Regexify_3(t *testing.T) {
+func Test_Pattern_Regexify_3(t *testing.T) {
 	aimlPattern := &AIMLPattern{
 		Content: "* IT *",
 	}
@@ -53,7 +53,7 @@ func TestPattern_Regexify_3(t *testing.T) {
 	}
 }
 
-func TestPattern_Regexify_4(t *testing.T) {
+func Test_Pattern_Regexify_4(t *testing.T) {
 	aimlPattern := &AIMLPattern{
 		Content: "* IT *",
 	}
