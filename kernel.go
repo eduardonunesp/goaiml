@@ -87,6 +87,23 @@ func (aiml *AIMLInterpreter) compilePatterns() error {
 		}
 	}
 
+	for _, topic := range aiml.Root.Topics {
+		for _, category := range topic.Categories {
+			if strings.Contains(category.Pattern.Content, "<bot") {
+				var err error = nil
+				category.Pattern.Content, err = aiml.ProcessBotTag(category.Pattern.Content)
+				if err != nil {
+					return err
+				}
+			}
+
+			err := category.Pattern.Regexify()
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }
 

@@ -443,5 +443,117 @@ func Test_Kernel_Respond_At_Input(t *testing.T) {
 	if result != "Yes, you said YES" {
 		t.Error("Result not match:", result)
 	}
+}
 
+func Test_Kernel_Respond_At_Topic_1(t *testing.T) {
+	xml := []byte(
+		`<aiml version="1.0.1" encoding="UTF-8">
+			<topic name="dogs">
+				<category>
+					<pattern>DO YOU LIKE DOGS</pattern>
+					<template>I LIKE</template>
+				</category>
+			</topic>
+			<category>
+				<pattern>DO YOU LIKE DOGS</pattern>
+				<template>Nope</template>
+			</category>
+		</aiml>`,
+	)
+
+	aiml := NewAIMLInterpreter()
+	aiml.Memory["topic"] = "dogs"
+	err := aiml.LearnFromXML(xml)
+	if err != nil {
+		t.Error(err)
+	}
+
+	result, err := aiml.Respond("Do you like dogs")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if result != "I LIKE" {
+		t.Error("Result not match:", result)
+	}
+}
+
+func Test_Kernel_Respond_At_Topic_2(t *testing.T) {
+	xml := []byte(
+		`<aiml version="1.0.1" encoding="UTF-8">
+			<topic name="dogs">
+				<category>
+					<pattern>DO YOU LIKE DOGS</pattern>
+					<template>I LIKE</template>
+				</category>
+			</topic>
+			<category>
+				<pattern>* DOGS *</pattern>
+				<template>
+					<think>
+						<set name="topic">dogs</set>Ok, Dogs
+					</think>
+				</template>
+			</category>
+			<category>
+				<pattern>DO YOU LIKE DOGS</pattern>
+				<template>Nope</template>
+			</category>
+		</aiml>`,
+	)
+
+	aiml := NewAIMLInterpreter()
+	err := aiml.LearnFromXML(xml)
+	if err != nil {
+		t.Error(err)
+	}
+
+	result, err := aiml.Respond("Let's talk about dogs")
+	if err != nil {
+		t.Error(err)
+	}
+
+	result, err = aiml.Respond("Do you like dogs")
+
+	if result != "I LIKE" {
+		t.Error("Result not match:", result)
+	}
+}
+
+func Test_Kernel_Respond_At_Topic_3(t *testing.T) {
+	xml := []byte(
+		`<aiml version="1.0.1" encoding="UTF-8">
+			<topic name="dogs">
+				<category>
+					<pattern>* DOGS *</pattern>
+					<template>
+						<set name="topic"></set>
+						Ok
+					</template>
+				</category>
+			</topic>
+			<category>
+				<pattern>DO YOU LIKE DOGS</pattern>
+				<template>Nope</template>
+			</category>
+		</aiml>`,
+	)
+
+	aiml := NewAIMLInterpreter()
+	aiml.Memory["topic"] = "dogs"
+	err := aiml.LearnFromXML(xml)
+	if err != nil {
+		t.Error(err)
+	}
+
+	result, err := aiml.Respond("Let's talk about dogs")
+	if err != nil {
+		t.Error(err)
+	}
+
+	result, err = aiml.Respond("Do you like dogs")
+
+	if result != "Nope" {
+		t.Error("Result not match:", result)
+	}
 }

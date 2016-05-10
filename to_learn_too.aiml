@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aiml version="1.0.1">
+    <category>
+        <pattern>JUST LOAD AGAIN</pattern>
+        <template>
+            SURE
+        </template>
+   </category>
+</aiml>

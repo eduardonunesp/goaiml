@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aiml version="1.0.1">
+    <category>
+        <pattern>HEYHEY</pattern>
+        <template>
+            YEAH MAN
+        </template>
+   </category>
+   <category>
+       <pattern>*</pattern>
+       <template>
+           <srai>DO YOU HAVE ANY IDEA</srai>
+       </template>
+   </category>
+</aiml>
